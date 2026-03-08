@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SCL-90 专业心理测评</title>
+    <title>SCL-90 心理健康测评报告</title>
     <link rel="stylesheet" href="https://cdn.staticfile.net/vant/4.8.0/index.min.css" />
     <style>
-        body { background-color: #f0f4f8; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif; margin: 0; padding: 0; }
         [v-cloak] { display: none !important; }
-        .app-wrapper { max-width: 480px; margin: 20px auto; background: #ffffff; min-height: 90vh; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden; position: relative; }
-        .test-container { padding: 24px 20px; }
+        .app-wrapper { max-width: 480px; margin: 0 auto; background: #f4f5f7; min-height: 100vh; position: relative; padding-bottom: 40px;}
         
         .error-page { text-align: center; padding-top: 100px; }
         .error-icon { font-size: 60px; color: #ee0a24; margin-bottom: 20px; }
-        .error-title { font-size: 20px; color: #323233; font-weight: bold; margin-bottom: 10px; }
-        .error-desc { font-size: 14px; color: #969799; line-height: 1.5; padding: 0 20px; }
-
+        
+        /* 答题区样式 */
+        .test-container { padding: 20px; background: #fff; border-radius: 0 0 20px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .question-title { font-size: 19px; line-height: 1.6; color: #1a1a1a; font-weight: 600; margin-bottom: 24px; }
         .option-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; margin-bottom: 12px; border-radius: 12px; background: #f8f9fa; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
         .option-item.active { background: #eef5ff; border-color: #1989fa; }
@@ -24,73 +23,157 @@
         .option-item.active .radio-circle { border-color: #1989fa; }
         .option-item.active .radio-circle::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #1989fa; }
 
-        .report-header { text-align: center; margin-bottom: 20px; }
-        .score-box { display: flex; justify-content: space-between; background: #f8f9fa; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
-        .score-item { text-align: center; }
-        .score-num { font-size: 24px; font-weight: bold; color: #1989fa; }
-        .score-label { font-size: 12px; color: #666; margin-top: 4px; }
-        .factor-list { border: 1px solid #ebedf0; border-radius: 12px; overflow: hidden; }
-        .factor-item { display: flex; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #ebedf0; font-size: 15px; }
-        .warning-text { color: #ee0a24; font-weight: bold; }
-        .attention-text { color: #ff976a; font-weight: bold; }
-        .normal-text { color: #07c160; font-weight: bold; }
+        /* 报告页新样式 */
+        .report-header-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px 30px; text-align: center; color: white; border-radius: 0 0 24px 24px; box-shadow: 0 10px 20px rgba(118, 75, 162, 0.2); }
+        .report-header-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.9; }
+        .report-header-title { font-size: 22px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px;}
+        .report-header-time { font-size: 13px; opacity: 0.8; }
+
+        .report-card { background: white; margin: -15px 15px 20px; border-radius: 16px; padding: 24px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); position: relative; z-index: 2; }
+        .card-title { text-align: center; font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
+        
+        /* 总体评估 */
+        .total-score-box { text-align: center; margin-bottom: 20px; }
+        .total-label { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .total-num { font-size: 48px; font-weight: bold; line-height: 1; }
+        .total-max { font-size: 13px; color: #999; margin-top: 5px; }
+        
+        .level-box { text-align: center; margin-top: 20px; margin-bottom: 20px; }
+        .level-label { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .level-tag { display: inline-block; padding: 8px 30px; border-radius: 8px; font-size: 20px; font-weight: bold; color: white; }
+        .advice-subtitle { font-size: 14px; font-weight: bold; margin-top: 8px; }
+        
+        .advice-box { background: #fff5f5; border-radius: 12px; padding: 16px; font-size: 14px; color: #333; line-height: 1.6; text-align: center; }
+
+        /* 因子表格 */
+        .legend-box { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; background: #fafafa; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 12px; color: #666; }
+        .legend-item { display: flex; align-items: center; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+        .factor-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+        .factor-table th { color: #666; font-weight: normal; padding: 12px 5px; border-bottom: 1px solid #eee; }
+        .factor-table td { padding: 16px 5px; border-bottom: 1px solid #f5f5f5; color: #333; }
+        .factor-table tr:last-child td { border-bottom: none; }
+        
+        .col-name { text-align: left; padding-left: 5px !important; font-weight: 500;}
+        .col-raw { color: #666; }
+        .col-avg { font-weight: bold; }
+        
+        .pill-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+
+        /* 颜色定义 */
+        .color-normal { color: #67c23a; }
+        .bg-normal { background: #67c23a; }
+        .pill-normal { background: #f0f9eb; color: #67c23a; }
+        .box-normal { background: #f0f9eb; }
+
+        .color-mild { color: #e6a23c; }
+        .bg-mild { background: #e6a23c; }
+        .pill-mild { background: #fdf6ec; color: #e6a23c; }
+        .box-mild { background: #fdf6ec; }
+
+        .color-moderate { color: #ff9900; }
+        .bg-moderate { background: #ff9900; }
+        .pill-moderate { background: #fff5e6; color: #ff9900; }
+        .box-moderate { background: #fff5e6; }
+
+        .color-severe { color: #f56c6c; }
+        .bg-severe { background: #f56c6c; }
+        .pill-severe { background: #fef0f0; color: #f56c6c; }
+        .box-severe { background: #fef0f0; }
+
     </style>
 </head>
 <body>
     <div id="app" v-cloak>
         <div class="app-wrapper">
-            <van-nav-bar title="SCL-90 心理健康测评" :border="false" style="background: #f0f4f8;"></van-nav-bar>
             
             <div v-if="!isValidLink" class="error-page">
                 <div class="error-icon">⚠️</div>
-                <div class="error-title">链接已失效或不合法</div>
-                <div class="error-desc">该专属测评链接可能已经过期<br>请重新联系小红书客服获取最新链接</div>
+                <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">链接已失效或不合法</div>
+                <div style="font-size: 14px; color: #999;">该专属测评链接可能已经过期<br>请重新联系小红书客服获取最新链接</div>
             </div>
 
-            <div v-else class="test-container">
-                <div v-if="!isFinished">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-size: 14px; color: #969799; font-weight: bold;">进度</span>
-                        <span style="font-size: 14px; color: #1989fa; font-weight: bold;">{{ currentIndex + 1 }} / 90</span>
-                    </div>
-                    <van-progress :percentage="progress" stroke-width="8" color="linear-gradient(to right, #69c0ff, #1989fa)" style="margin-bottom: 30px;"></van-progress>
+            <div v-else-if="!isFinished" class="test-container">
+                <van-nav-bar title="SCL-90 心理健康测评" :border="false"></van-nav-bar>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 12px;">
+                    <span style="font-size: 14px; color: #969799; font-weight: bold;">答题进度</span>
+                    <span style="font-size: 14px; color: #1989fa; font-weight: bold;">{{ currentIndex + 1 }} / 90</span>
+                </div>
+                <van-progress :percentage="progress" stroke-width="8" color="linear-gradient(to right, #69c0ff, #1989fa)" style="margin-bottom: 30px;"></van-progress>
 
-                    <div class="question-title">{{ currentQuestion.id }}. {{ currentQuestion.text }}</div>
-                    <div class="options-container">
-                        <div class="option-item" v-for="(opt, idx) in options" :key="idx" :class="{ 'active': currentAnswer === opt.value }" @click="selectOption(opt.value)">
-                            <span class="option-text">{{ opt.label }}</span>
-                            <div class="radio-circle"></div>
+                <div class="question-title">{{ currentQuestion.id }}. {{ currentQuestion.text }}</div>
+                <div class="options-container">
+                    <div class="option-item" v-for="(opt, idx) in options" :key="idx" :class="{ 'active': currentAnswer === opt.value }" @click="selectOption(opt.value)">
+                        <span class="option-text">{{ opt.label }}</span>
+                        <div class="radio-circle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else>
+                <div class="report-header-bg">
+                    <div class="report-header-icon">🤍</div>
+                    <div class="report-header-title">SCL-90 心理健康测评报告</div>
+                    <div class="report-header-time">测评完成时间: {{ finishTime }}</div>
+                </div>
+
+                <div class="report-card" style="margin-top: -30px;">
+                    <div class="card-title">总体评估结果</div>
+                    
+                    <div class="total-score-box">
+                        <div class="total-label">SCL-90 总分</div>
+                        <div class="total-num" :class="overallStatus.colorClass">{{ totalScore }}</div>
+                        <div class="total-max">满分 450 分</div>
+                    </div>
+
+                    <div class="level-box">
+                        <div class="level-label">心理健康程度</div>
+                        <div class="level-tag" :class="overallStatus.bgClass" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            {{ overallStatus.levelText }}
                         </div>
+                        <div class="advice-subtitle" :class="overallStatus.colorClass">{{ overallStatus.actionText }}</div>
+                    </div>
+
+                    <div class="advice-box" :class="overallStatus.boxClass">
+                        {{ overallStatus.adviceDesc }}
                     </div>
                 </div>
 
-                <div v-else>
-                    <div class="report-header">
-                        <h2 style="margin: 0; color: #323233;">测评结果报告</h2>
-                        <p style="font-size: 13px; color: #969799; margin-top: 8px;">报告仅供参考，不作为医学诊断依据</p>
-                    </div>
-
-                    <div class="score-box">
-                        <div class="score-item">
-                            <div class="score-num" :style="{color: totalScore > 160 ? '#ee0a24' : '#1989fa'}">{{ totalScore }}</div>
-                            <div class="score-label">总分 (>160需注意)</div>
-                        </div>
-                        <div class="score-item" style="border-left: 1px solid #e8e8e8; padding-left: 20px;">
-                            <div class="score-num" :style="{color: positiveCount > 43 ? '#ee0a24' : '#1989fa'}">{{ positiveCount }}</div>
-                            <div class="score-label">阳性项目 (>43需注意)</div>
-                        </div>
-                    </div>
-
-                    <van-notice-bar wrapable :scrollable="false" text="【指引】维度得分：1-1.99为正常；2-2.99为轻度(橘色)；≥3分为中重度(红色)，需重点关注。" style="margin-bottom: 20px; border-radius: 8px; background: #fffbe8; color: #ed6a0c;"></van-notice-bar>
+                <div class="report-card">
+                    <div class="card-title">因子维度详情</div>
                     
-                    <div class="factor-list">
-                        <div style="padding: 14px 16px; font-weight: bold; background: #f8f9fa; border-bottom: 1px solid #ebedf0; font-size: 15px;">10项维度因子分析</div>
-                        <div v-for="(score, name) in factorResults" :key="name" class="factor-item">
-                            <span style="color: #323233;">{{ name }}</span>
-                            <span :class="score >= 3 ? 'warning-text' : (score >= 2 ? 'attention-text' : 'normal-text')">{{ score }} 分</span>
-                        </div>
+                    <div class="legend-box">
+                        <div class="legend-item"><div class="legend-dot bg-normal"></div>正常 (&lt; 2.0)</div>
+                        <div class="legend-item"><div class="legend-dot bg-mild"></div>轻度 (2.0-2.49)</div>
+                        <div class="legend-item"><div class="legend-dot bg-moderate"></div>中度 (2.5-2.99)</div>
+                        <div class="legend-item"><div class="legend-dot bg-severe"></div>重度 (≥ 3.0)</div>
                     </div>
-                    <van-button type="primary" block round style="margin-top: 30px; height: 48px; font-size: 16px;" @click="refresh">重新测试</van-button>
+
+                    <table class="factor-table">
+                        <thead>
+                            <tr>
+                                <th class="col-name" style="width: 32%;">维度</th>
+                                <th style="width: 22%;">原始分</th>
+                                <th style="width: 22%;">均分</th>
+                                <th style="width: 24%;">水平</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in factorDetails" :key="item.name">
+                                <td class="col-name">{{ item.name }}</td>
+                                <td class="col-raw">{{ item.raw }}</td>
+                                <td class="col-avg" :class="item.colorClass">{{ item.avg }}</td>
+                                <td>
+                                    <span class="pill-tag" :class="item.pillClass">{{ item.level }}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="padding: 0 15px;">
+                    <van-button type="primary" block round plain style="height: 48px; font-size: 16px;" @click="refresh">重新测试</van-button>
                 </div>
             </div>
         </div>
@@ -106,6 +189,7 @@
             setup() {
                 const isValidLink = ref(false); 
                 const SECRET_SALT = "scl90_pro"; 
+                const finishTime = ref("");
 
                 onMounted(() => {
                     const params = new URLSearchParams(window.location.search);
@@ -131,6 +215,7 @@
                 const isFinished = ref(false);
                 const currentAnswer = ref(null);
 
+                // 90道题库 (此处折叠以节省空间，与你之前完全一致)
                 const questions = [
                     { id: 1, text: "头痛" }, { id: 2, text: "神经过敏，心中不踏实" }, { id: 3, text: "头脑中有不必要的想法或字句盘旋" },
                     { id: 4, text: "头晕或晕倒" }, { id: 5, text: "对异性的兴趣减退" }, { id: 6, text: "对旁人责备求全" },
@@ -180,13 +265,15 @@
                             currentIndex.value++;
                             currentAnswer.value = null;
                         } else {
+                            // 答题结束，记录时间
+                            const now = new Date();
+                            finishTime.value = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                             isFinished.value = true;
                         }
-                    }, 300); 
+                    }, 250); 
                 };
 
                 const totalScore = computed(() => userAnswers.value.reduce((sum, score) => sum + score, 0));
-                const positiveCount = computed(() => userAnswers.value.filter(score => score >= 2).length);
 
                 const factorMapping = {
                     "躯体化": [1, 4, 12, 27, 40, 42, 48, 49, 52, 53, 56, 58],
@@ -198,17 +285,58 @@
                     "恐怖": [13, 25, 47, 50, 70, 75, 82],
                     "偏执": [8, 18, 43, 68, 76, 83],
                     "精神病性": [7, 16, 35, 62, 77, 84, 85, 87, 88, 90],
-                    "其他 (睡眠与饮食)": [19, 44, 59, 60, 64, 66, 89]
+                    "睡眠及其他": [19, 44, 59, 60, 64, 66, 89]
                 };
 
-                const factorResults = computed(() => {
-                    let results = {};
+                // 核心逻辑：计算并映射每个维度的等级和颜色
+                const factorDetails = computed(() => {
+                    let details = [];
                     for (let f in factorMapping) {
                         let sum = 0;
                         factorMapping[f].forEach(idx => { sum += (userAnswers.value[idx - 1] || 0); });
-                        results[f] = (sum / factorMapping[f].length).toFixed(2);
+                        let avg = (sum / factorMapping[f].length).toFixed(2);
+                        let numAvg = parseFloat(avg);
+                        
+                        let level = '正常';
+                        let pillClass = 'pill-normal';
+                        let colorClass = 'color-normal';
+
+                        if (numAvg >= 3.0) {
+                            level = '重度'; pillClass = 'pill-severe'; colorClass = 'color-severe';
+                        } else if (numAvg >= 2.5) {
+                            level = '中度'; pillClass = 'pill-moderate'; colorClass = 'color-moderate';
+                        } else if (numAvg >= 2.0) {
+                            level = '轻度'; pillClass = 'pill-mild'; colorClass = 'color-mild';
+                        }
+
+                        details.push({
+                            name: f,
+                            raw: sum,
+                            avg: avg,
+                            level: level,
+                            pillClass: pillClass,
+                            colorClass: colorClass
+                        });
                     }
-                    return results;
+                    return details;
+                });
+
+                // 总体评估逻辑：根据最高维度或总分进行诊断
+                const overallStatus = computed(() => {
+                    const score = totalScore.value;
+                    let maxFactor = 0;
+                    factorDetails.value.forEach(d => { if(parseFloat(d.avg) > maxFactor) maxFactor = parseFloat(d.avg); });
+
+                    if (score >= 250 || maxFactor >= 3.0) {
+                        return { levelText: '重度', actionText: '建议求助', colorClass: 'color-severe', bgClass: 'bg-severe', boxClass: 'box-severe', adviceDesc: '您的总体心理健康状况评估为重度水平。系统检测到您的部分核心心理维度得分偏高，强烈建议您尽快寻求专业心理咨询师或前往医疗机构进行进一步的诊断与帮助。' };
+                    }
+                    if (score >= 200 || maxFactor >= 2.5) {
+                        return { levelText: '中度', actionText: '需要关注', colorClass: 'color-moderate', bgClass: 'bg-moderate', boxClass: 'box-moderate', adviceDesc: '您的总体心理健康状况评估为中度水平。近期您可能正承受着较为明显的心理压力和情绪困扰，建议您及时进行自我心理疏导，必要时可预约心理咨询。' };
+                    }
+                    if (score >= 160 || maxFactor >= 2.0) {
+                        return { levelText: '轻度', actionText: '建议调节', colorClass: 'color-mild', bgClass: 'bg-mild', boxClass: 'box-mild', adviceDesc: '您的总体心理健康状况评估为轻度水平。表明您近期存在轻微的心理波动或压力，请注意劳逸结合，多做放松训练，保持积极乐观的心态。' };
+                    }
+                    return { levelText: '正常', actionText: '继续保持', colorClass: 'color-normal', bgClass: 'bg-normal', boxClass: 'box-normal', adviceDesc: '您的总体心理健康状况评估为正常水平。您的心理状态非常健康，具备良好的心理弹性和适应能力，请继续保持良好的生活方式！' };
                 });
 
                 const refresh = () => {
@@ -219,9 +347,8 @@
                 };
 
                 return { 
-                    isValidLink, 
-                    currentIndex, questions, options, progress, currentQuestion, currentAnswer, selectOption, 
-                    isFinished, factorResults, totalScore, positiveCount, refresh 
+                    isValidLink, currentIndex, questions, options, progress, currentQuestion, currentAnswer, selectOption, 
+                    isFinished, finishTime, totalScore, factorDetails, overallStatus, refresh 
                 };
             }
         }).use(vant).mount('#app');
