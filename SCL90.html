@@ -3,61 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SCL-90 专业心理测评</title>
+    <title>SCL-90 专业心理健康报告</title>
     <link rel="stylesheet" href="https://cdn.staticfile.net/vant/4.8.0/index.min.css" />
     <style>
-        body { background-color: #f0f4f8; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f7f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
         [v-cloak] { display: none !important; }
-        .app-wrapper { max-width: 480px; margin: 20px auto; background: #ffffff; min-height: 90vh; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden; position: relative; }
-        .test-container { padding: 24px 20px; }
+        .app-wrapper { max-width: 480px; margin: 0 auto; background: #ffffff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .test-container { padding: 20px; }
         
+        /* 错误拦截 */
         .error-page { text-align: center; padding-top: 100px; }
-        .error-icon { font-size: 60px; color: #ee0a24; margin-bottom: 20px; }
-        .error-title { font-size: 20px; color: #323233; font-weight: bold; margin-bottom: 10px; }
-        .error-desc { font-size: 14px; color: #969799; line-height: 1.5; padding: 0 20px; }
+        .error-icon { font-size: 60px; margin-bottom: 20px; }
 
-        .question-title { font-size: 19px; line-height: 1.6; color: #1a1a1a; font-weight: 600; margin-bottom: 24px; }
-        .option-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; margin-bottom: 12px; border-radius: 12px; background: #f8f9fa; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
+        /* 答题区样式 */
+        .question-title { font-size: 20px; font-weight: 600; color: #1a1a1a; line-height: 1.5; margin-bottom: 30px; }
+        .option-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; margin-bottom: 12px; border-radius: 14px; background: #f8f9fa; border: 2px solid transparent; cursor: pointer; transition: 0.2s; }
         .option-item.active { background: #eef5ff; border-color: #1989fa; }
-        .option-text { font-size: 16px; color: #333; }
-        .radio-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ccc; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
-        .option-item.active .radio-circle { border-color: #1989fa; }
-        .option-item.active .radio-circle::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #1989fa; }
+        .radio-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; }
+        .option-item.active .radio-circle { border-color: #1989fa; background: #1989fa; box-shadow: inset 0 0 0 4px #eef5ff; }
 
-        .report-header { text-align: center; margin-bottom: 20px; }
-        .score-box { display: flex; justify-content: space-between; background: #f8f9fa; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
-        .score-item { text-align: center; }
-        .score-num { font-size: 24px; font-weight: bold; color: #1989fa; }
-        .score-label { font-size: 12px; color: #666; margin-top: 4px; }
-        .factor-list { border: 1px solid #ebedf0; border-radius: 12px; overflow: hidden; }
-        .factor-item { display: flex; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #ebedf0; font-size: 15px; }
-        .warning-text { color: #ee0a24; font-weight: bold; }
-        .attention-text { color: #ff976a; font-weight: bold; }
-        .normal-text { color: #07c160; font-weight: bold; }
+        /* 报告页高级样式 */
+        .report-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #edf2f7; }
+        .report-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #2d3748; display: flex; align-items: center; }
+        .report-title::before { content: ''; width: 4px; height: 18px; background: #1989fa; margin-right: 10px; border-radius: 2px; }
+        
+        .summary-box { background: linear-gradient(135deg, #1989fa, #0570e1); color: white; border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+        .factor-row { margin-bottom: 18px; }
+        .factor-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; color: #4a5568; }
+        .factor-label { font-weight: 500; }
+        .score-tag { font-weight: bold; }
+        
+        /* 建议卡片颜色环境 */
+        .advice-box { padding: 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+        .advice-danger { background: #fff5f5; color: #c53030; border-left: 4px solid #fc8181; }
+        .advice-warning { background: #fffaf0; color: #975a16; border-left: 4px solid #f6ad55; }
+        .advice-success { background: #f0fff4; color: #2f855a; border-left: 4px solid #68d391; }
     </style>
 </head>
 <body>
     <div id="app" v-cloak>
         <div class="app-wrapper">
-            <van-nav-bar title="SCL-90 心理健康测评" :border="false" style="background: #f0f4f8;"></van-nav-bar>
+            <van-nav-bar title="测评中心" :border="false"></van-nav-bar>
             
             <div v-if="!isValidLink" class="error-page">
-                <div class="error-icon">⚠️</div>
-                <div class="error-title">链接已失效或不合法</div>
-                <div class="error-desc">该专属测评链接可能已经过期<br>请重新联系小红书客服获取最新链接</div>
+                <div class="error-icon">🔒</div>
+                <div class="error-title">链接验证失败</div>
+                <div class="error-desc">该链接已过期或参数错误。请通过小红书私信获取最新的专属测评链接。</div>
             </div>
 
             <div v-else class="test-container">
                 <div v-if="!isFinished">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-size: 14px; color: #969799; font-weight: bold;">进度</span>
-                        <span style="font-size: 14px; color: #1989fa; font-weight: bold;">{{ currentIndex + 1 }} / 90</span>
+                    <div style="margin-bottom: 25px;">
+                        <div style="display:flex; justify-content: space-between; font-size: 13px; color: #94a3b8; margin-bottom: 8px;">
+                            <span>已完成 {{ currentIndex + 1 }}/90</span>
+                            <span>{{ progress }}%</span>
+                        </div>
+                        <van-progress :percentage="progress" stroke-width="6" color="#1989fa" :show-pivot="false"></van-progress>
                     </div>
-                    <van-progress :percentage="progress" stroke-width="8" color="linear-gradient(to right, #69c0ff, #1989fa)" style="margin-bottom: 30px;"></van-progress>
 
-                    <div class="question-title">{{ currentQuestion.id }}. {{ currentQuestion.text }}</div>
+                    <div class="question-title">{{ currentQuestion.text }}</div>
+                    
                     <div class="options-container">
-                        <div class="option-item" v-for="(opt, idx) in options" :key="idx" :class="{ 'active': currentAnswer === opt.value }" @click="selectOption(opt.value)">
+                        <div class="option-item" v-for="opt in options" :key="opt.value" 
+                             :class="{ 'active': currentAnswer === opt.value }" @click="selectOption(opt.value)">
                             <span class="option-text">{{ opt.label }}</span>
                             <div class="radio-circle"></div>
                         </div>
@@ -65,32 +73,42 @@
                 </div>
 
                 <div v-else>
-                    <div class="report-header">
-                        <h2 style="margin: 0; color: #323233;">测评结果报告</h2>
-                        <p style="font-size: 13px; color: #969799; margin-top: 8px;">报告仅供参考，不作为医学诊断依据</p>
-                    </div>
-
-                    <div class="score-box">
-                        <div class="score-item">
-                            <div class="score-num" :style="{color: totalScore > 160 ? '#ee0a24' : '#1989fa'}">{{ totalScore }}</div>
-                            <div class="score-label">总分 (>160需注意)</div>
-                        </div>
-                        <div class="score-item" style="border-left: 1px solid #e8e8e8; padding-left: 20px;">
-                            <div class="score-num" :style="{color: positiveCount > 43 ? '#ee0a24' : '#1989fa'}">{{ positiveCount }}</div>
-                            <div class="score-label">阳性项目 (>43需注意)</div>
+                    <div class="summary-box">
+                        <div style="font-size: 14px; opacity: 0.9;">测评结论汇总</div>
+                        <div style="font-size: 28px; font-weight: bold; margin: 10px 0;">{{ finalStatus.title }}</div>
+                        <div style="font-size: 13px; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
+                            总分：{{ totalScore }} | 阳性项目数：{{ positiveCount }}
                         </div>
                     </div>
 
-                    <van-notice-bar wrapable :scrollable="false" text="【指引】维度得分：1-1.99为正常；2-2.99为轻度(橘色)；≥3分为中重度(红色)，需重点关注。" style="margin-bottom: 20px; border-radius: 8px; background: #fffbe8; color: #ed6a0c;"></van-notice-bar>
-                    
-                    <div class="factor-list">
-                        <div style="padding: 14px 16px; font-weight: bold; background: #f8f9fa; border-bottom: 1px solid #ebedf0; font-size: 15px;">10项维度因子分析</div>
-                        <div v-for="(score, name) in factorResults" :key="name" class="factor-item">
-                            <span style="color: #323233;">{{ name }}</span>
-                            <span :class="score >= 3 ? 'warning-text' : (score >= 2 ? 'attention-text' : 'normal-text')">{{ score }} 分</span>
+                    <div class="report-card">
+                        <div class="report-title">10项维度状态剖析</div>
+                        <div v-for="(score, name) in factorResults" :key="name" class="factor-row">
+                            <div class="factor-info">
+                                <span class="factor-label">{{ name }}</span>
+                                <span class="score-tag" :style="{color: getScoreColor(score)}">{{ score }} 分</span>
+                            </div>
+                            <van-progress :percentage="getScorePercent(score)" stroke-width="10" :color="getScoreColor(score)" :show-pivot="false"></van-progress>
+                        </div>
+                        <div style="font-size: 12px; color: #a0aec0; margin-top: 15px; text-align: center;">
+                            注：得分越高代表该维度症状越明显
                         </div>
                     </div>
-                    <van-button type="primary" block round style="margin-top: 30px; height: 48px; font-size: 16px;" @click="refresh">重新测试</van-button>
+
+                    <div class="report-card">
+                        <div class="report-title">专家建议与引导</div>
+                        <div :class="['advice-box', finalStatus.class]">
+                            <div style="font-weight: bold; margin-bottom: 8px;">💡 评估意见：</div>
+                            {{ finalStatus.advice }}
+                        </div>
+                        
+                        <div v-if="hasMajorProblem" style="margin-top: 20px; font-size: 13px; color: #718096; background: #f7fafc; padding: 12px; border-radius: 8px;">
+                            <strong>温馨提示：</strong>由于您有部分因子得分处于高位，建议您将此报告截屏保存，咨询专业心理咨询师或前往医院精神心理科进行面诊。
+                        </div>
+                    </div>
+
+                    <van-button type="primary" block round plain style="margin-top: 20px;" @click="refresh">重新测试</van-button>
+                    <div style="height: 40px;"></div>
                 </div>
             </div>
         </div>
@@ -104,32 +122,26 @@
 
         createApp({
             setup() {
-                const isValidLink = ref(false); 
-                const SECRET_SALT = "scl90_pro"; 
+                const isValidLink = ref(false);
+                const isFinished = ref(false);
+                const currentIndex = ref(0);
+                const userAnswers = ref([]);
+                const currentAnswer = ref(null);
+                const SECRET_SALT = "scl90_pro";
 
                 onMounted(() => {
                     const params = new URLSearchParams(window.location.search);
                     const key = params.get('key');
                     if (key) {
                         try {
-                            const decoded = atob(key); 
+                            const decoded = atob(key);
                             const parts = decoded.split('||');
-                            if (parts.length === 2 && parts[1] === SECRET_SALT) {
-                                const expireTime = parseInt(parts[0]);
-                                if (Date.now() < expireTime) {
-                                    isValidLink.value = true; 
-                                }
+                            if (parts.length === 2 && parts[1] === SECRET_SALT && Date.now() < parseInt(parts[0])) {
+                                isValidLink.value = true;
                             }
-                        } catch (e) {
-                            console.log("密钥解析失败");
-                        }
+                        } catch (e) { console.error("Verify Failed"); }
                     }
                 });
-
-                const currentIndex = ref(0);
-                const userAnswers = ref([]);
-                const isFinished = ref(false);
-                const currentAnswer = ref(null);
 
                 const questions = [
                     { id: 1, text: "头痛" }, { id: 2, text: "神经过敏，心中不踏实" }, { id: 3, text: "头脑中有不必要的想法或字句盘旋" },
@@ -168,9 +180,6 @@
                     { label: "偏重", value: 4 }, { label: "严重", value: 5 }
                 ];
 
-                const progress = computed(() => Math.floor((currentIndex.value / questions.length) * 100));
-                const currentQuestion = computed(() => questions[currentIndex.value]);
-
                 const selectOption = (val) => {
                     if (currentAnswer.value !== null) return;
                     currentAnswer.value = val;
@@ -179,14 +188,9 @@
                         if (currentIndex.value < questions.length - 1) {
                             currentIndex.value++;
                             currentAnswer.value = null;
-                        } else {
-                            isFinished.value = true;
-                        }
-                    }, 300); 
+                        } else { isFinished.value = true; }
+                    }, 250);
                 };
-
-                const totalScore = computed(() => userAnswers.value.reduce((sum, score) => sum + score, 0));
-                const positiveCount = computed(() => userAnswers.value.filter(score => score >= 2).length);
 
                 const factorMapping = {
                     "躯体化": [1, 4, 12, 27, 40, 42, 48, 49, 52, 53, 56, 58],
@@ -198,9 +202,10 @@
                     "恐怖": [13, 25, 47, 50, 70, 75, 82],
                     "偏执": [8, 18, 43, 68, 76, 83],
                     "精神病性": [7, 16, 35, 62, 77, 84, 85, 87, 88, 90],
-                    "其他 (睡眠与饮食)": [19, 44, 59, 60, 64, 66, 89]
+                    "其他": [19, 44, 59, 60, 64, 66, 89]
                 };
 
+                // 计算结果逻辑
                 const factorResults = computed(() => {
                     let results = {};
                     for (let f in factorMapping) {
@@ -211,17 +216,60 @@
                     return results;
                 });
 
+                const totalScore = computed(() => userAnswers.value.reduce((s, a) => s + a, 0));
+                const positiveCount = computed(() => userAnswers.value.filter(a => a >= 2).length);
+                const progress = computed(() => Math.round((currentIndex.value / 90) * 100));
+                const currentQuestion = computed(() => questions[currentIndex.value]);
+
+                // 辅助函数：颜色与长度
+                const getScoreColor = (score) => {
+                    if (score >= 3) return '#ee0a24'; // 红色：严重
+                    if (score >= 2) return '#ff976a'; // 橘色：轻度
+                    return '#07c160'; // 绿色：正常
+                };
+                const getScorePercent = (score) => (score / 5) * 100;
+
+                // 【核心】根据分数判断状态并给出建议
+                const finalStatus = computed(() => {
+                    const results = factorResults.value;
+                    let highFactors = [];
+                    for (let f in results) {
+                        if (results[f] >= 3) highFactors.append(f);
+                    }
+
+                    if (highFactors.length > 0 || totalScore.value > 160) {
+                        return {
+                            title: "提示风险：需重点关注",
+                            class: "advice-danger",
+                            advice: `您的测评结果显示，在【${highFactors.join('、') || '总分'}】维度得分较高（≥3分）。这提示您当前可能正承受较为明显的心理压力或症状困扰。强烈建议您寻求专业心理咨询师的帮助，或前往正规医疗机构的精神心理科进行面诊评估。`
+                        };
+                    } else if (positiveCount.value > 43) {
+                        return {
+                            title: "轻度困扰：建议调节",
+                            class: "advice-warning",
+                            advice: "您的阳性项目数较多，说明近期心理状态有些波动。建议您近期多关注情绪变化，尝试运动、冥想或与信任的朋友倾诉。如不适感持续，建议预约一次心理咨询进行疏解。"
+                        };
+                    } else {
+                        return {
+                            title: "状态良好：继续保持",
+                            class: "advice-success",
+                            advice: "恭喜！您的各项指标均在正常范围内。说明您目前的心理适应能力较强，生活状态平稳。请继续保持良好的生活作息和积极的心态。"
+                        };
+                    }
+                });
+
+                const hasMajorProblem = computed(() => totalScore.value > 160 || Object.values(factorResults.value).some(s => s >= 3));
+
                 const refresh = () => {
-                    currentIndex.value = 0;
-                    userAnswers.value = [];
-                    currentAnswer.value = null;
-                    isFinished.value = false;
+                    currentIndex.value = 0; userAnswers.value = [];
+                    currentAnswer.value = null; isFinished.value = false;
                 };
 
                 return { 
-                    isValidLink, 
-                    currentIndex, questions, options, progress, currentQuestion, currentAnswer, selectOption, 
-                    isFinished, factorResults, totalScore, positiveCount, refresh 
+                    isValidLink, isFinished, currentIndex, questions, options, 
+                    progress, currentQuestion, currentAnswer, selectOption,
+                    factorResults, totalScore, positiveCount, finalStatus, hasMajorProblem,
+                    getScoreColor, getScorePercent, refresh 
                 };
             }
         }).use(vant).mount('#app');
