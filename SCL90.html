@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SCL-90 专业心理测评</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/vant/4.8.0/index.min.css" />
+    <link rel="stylesheet" href="https://cdn.staticfile.net/vant/4.8.0/index.min.css" />
     <style>
         body { background-color: #f0f4f8; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif; margin: 0; padding: 0; }
         [v-cloak] { display: none !important; }
         .app-wrapper { max-width: 480px; margin: 20px auto; background: #ffffff; min-height: 90vh; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden; position: relative; }
         .test-container { padding: 24px 20px; }
         
-        /* 错误拦截页面样式 */
         .error-page { text-align: center; padding-top: 100px; }
         .error-icon { font-size: 60px; color: #ee0a24; margin-bottom: 20px; }
         .error-title { font-size: 20px; color: #323233; font-weight: bold; margin-bottom: 10px; }
         .error-desc { font-size: 14px; color: #969799; line-height: 1.5; padding: 0 20px; }
 
-        /* 答题卡样式 */
         .question-title { font-size: 19px; line-height: 1.6; color: #1a1a1a; font-weight: 600; margin-bottom: 24px; }
         .option-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; margin-bottom: 12px; border-radius: 12px; background: #f8f9fa; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
         .option-item.active { background: #eef5ff; border-color: #1989fa; }
@@ -26,7 +24,6 @@
         .option-item.active .radio-circle { border-color: #1989fa; }
         .option-item.active .radio-circle::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #1989fa; }
 
-        /* 报告页样式 */
         .report-header { text-align: center; margin-bottom: 20px; }
         .score-box { display: flex; justify-content: space-between; background: #f8f9fa; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
         .score-item { text-align: center; }
@@ -99,36 +96,28 @@
         </div>
     </div>
 
-    <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/vant/4.8.0/vant.min.js"></script>
+    <script src="https://cdn.staticfile.net/vue/3.3.4/vue.global.min.js"></script>
+    <script src="https://cdn.staticfile.net/vant/4.8.0/vant.min.js"></script>
 
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
 
         createApp({
             setup() {
-                // ================== 【时效链接校验核心】 ==================
-                const isValidLink = ref(false); // 默认拦截
-                const SECRET_SALT = "scl90_pro"; // 这个是咱们的防伪暗号
+                const isValidLink = ref(false); 
+                const SECRET_SALT = "scl90_pro"; 
 
                 onMounted(() => {
-                    // 获取网址里 ?key= 后面的那一串密码
                     const params = new URLSearchParams(window.location.search);
                     const key = params.get('key');
-
                     if (key) {
                         try {
-                            // 解密密码
                             const decoded = atob(key); 
                             const parts = decoded.split('||');
-                            
-                            // 检查暗号是否正确，且时间是否过期
                             if (parts.length === 2 && parts[1] === SECRET_SALT) {
                                 const expireTime = parseInt(parts[0]);
-                                const currentTime = Date.now(); // 当前系统时间(毫秒)
-                                
-                                if (currentTime < expireTime) {
-                                    isValidLink.value = true; // 放行！
+                                if (Date.now() < expireTime) {
+                                    isValidLink.value = true; 
                                 }
                             }
                         } catch (e) {
@@ -136,7 +125,6 @@
                         }
                     }
                 });
-                // =======================================================
 
                 const currentIndex = ref(0);
                 const userAnswers = ref([]);
@@ -231,7 +219,7 @@
                 };
 
                 return { 
-                    isValidLink, // 决定是否拦截
+                    isValidLink, 
                     currentIndex, questions, options, progress, currentQuestion, currentAnswer, selectOption, 
                     isFinished, factorResults, totalScore, positiveCount, refresh 
                 };
