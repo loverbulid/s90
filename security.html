@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>安全感与缺爱指数深度测评报告</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.net/vant/4.8.0/index.min.css" />
+    <style>
+        body { background-color: #fff9f5; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif; margin: 0; padding: 0; }
+        [v-cloak] { display: none !important; }
+        .app-wrapper { max-width: 480px; margin: 0 auto; background: #fff9f5; min-height: 100vh; position: relative; padding-bottom: 40px;}
+        
+        .error-page { text-align: center; padding-top: 100px; }
+        .error-icon { font-size: 60px; color: #ff8e53; margin-bottom: 20px; }
+        
+        /* 答题区样式 - 温暖系 */
+        .test-container { padding: 20px; background: #fff; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(255, 142, 83, 0.08); }
+        .test-desc { font-size: 13px; color: #8c6b5d; background: #fff3ec; padding: 12px; border-radius: 8px; margin-bottom: 20px; line-height: 1.5; }
+        .question-title { font-size: 19px; line-height: 1.6; color: #4a352f; font-weight: 600; margin-bottom: 24px; }
+        .option-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; margin-bottom: 12px; border-radius: 12px; background: #fcf8f5; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
+        .option-item.active { background: #fff0e8; border-color: #ff8e53; }
+        .option-text { font-size: 15px; color: #5c433b; }
+        .radio-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #deb8a9; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
+        .option-item.active .radio-circle { border-color: #ff8e53; }
+        .option-item.active .radio-circle::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #ff8e53; }
+
+        /* 报告页样式 - 治愈暖橘渐变色调 */
+        .report-header-bg { background: linear-gradient(135deg, #ff9a44 0%, #fc6076 100%); padding: 40px 20px 30px; text-align: center; color: white; border-radius: 0 0 24px 24px; box-shadow: 0 10px 20px rgba(252, 96, 118, 0.2); }
+        .report-header-icon { font-size: 38px; margin-bottom: 10px; opacity: 0.95; }
+        .report-header-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px;}
+        .report-header-time { font-size: 13px; opacity: 0.8; }
+
+        .report-card { background: white; margin: -15px 15px 20px; border-radius: 16px; padding: 24px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); position: relative; z-index: 2; }
+        .card-title { text-align: center; font-size: 18px; font-weight: bold; color: #4a352f; margin-bottom: 20px; }
+        
+        /* 总体评估 */
+        .total-score-box { text-align: center; margin-bottom: 20px; }
+        .total-label { font-size: 14px; color: #8c6b5d; margin-bottom: 5px; }
+        .total-num { font-size: 48px; font-weight: bold; line-height: 1; }
+        .total-max { font-size: 13px; color: #bda195; margin-top: 5px; }
+        
+        .level-box { text-align: center; margin-top: 20px; margin-bottom: 20px; }
+        .level-label { font-size: 14px; color: #8c6b5d; margin-bottom: 10px; }
+        .level-tag { display: inline-block; padding: 10px 25px; border-radius: 12px; font-size: 20px; font-weight: bold; color: white; }
+        .advice-subtitle { font-size: 15px; font-weight: bold; margin-top: 12px; }
+        
+        .advice-box { background: #fff5f5; border-radius: 12px; padding: 18px; font-size: 15px; color: #5c433b; line-height: 1.6; text-align: justify; }
+
+        /* 附加说明卡片 */
+        .info-box { background: #fcf8f5; border-radius: 12px; padding: 16px; margin-top: 20px; }
+        .info-title { font-size: 15px; font-weight: bold; color: #4a352f; margin-bottom: 8px; }
+        .info-text { font-size: 13px; color: #8c6b5d; line-height: 1.6; }
+
+        /* 颜色定义（由于1分是最缺乏安全感，低分标红/橘，高分标绿/蓝） */
+        .color-severe { color: #fc6076; } 
+        .bg-severe { background: #fc6076; }
+        .box-severe { background: #fff0f2; border: 1px solid #ffd1d8; }
+
+        .color-moderate { color: #ff9a44; } 
+        .bg-moderate { background: #ff9a44; }
+        .box-moderate { background: #fff6eb; border: 1px solid #ffe1c2; }
+
+        .color-mild { color: #38b2ac; } 
+        .bg-mild { background: #38b2ac; }
+        .box-mild { background: #e6f7f6; border: 1px solid #bce6e4; }
+
+    </style>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <div class="app-wrapper">
+            
+            <div v-if="!isValidLink" class="error-page">
+                <div class="error-icon">💌</div>
+                <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #4a352f;">链接已失效或不合法</div>
+                <div style="font-size: 14px; color: #8c6b5d;">该专属测评链接可能已经过期<br>请重新联系博主获取最新链接</div>
+            </div>
+
+            <div v-else-if="!isFinished" class="test-container">
+                <van-nav-bar title="安全感指数测试" :border="false"></van-nav-bar>
+                
+                <div class="test-desc">
+                    🧸 提示：本测试依据马斯洛安全感-不安全感量表（S-I）编制。请根据您经常性的感受或行为进行选择，不必花太多时间犹豫，第一直觉最准哦。
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 12px;">
+                    <span style="font-size: 14px; color: #8c6b5d; font-weight: bold;">答题进度</span>
+                    <span style="font-size: 14px; color: #ff8e53; font-weight: bold;">{{ currentIndex + 1 }} / 16</span>
+                </div>
+                <van-progress :percentage="progress" stroke-width="8" color="linear-gradient(to right, #ff9a44, #fc6076)" style="margin-bottom: 30px;"></van-progress>
+
+                <div class="question-title">{{ currentQuestion.id }}. {{ currentQuestion.text }}</div>
+                <div class="options-container">
+                    <div class="option-item" v-for="(opt, idx) in options" :key="idx" :class="{ 'active': currentAnswer === opt.value }" @click="selectOption(opt.value)">
+                        <span class="option-text">{{ opt.label }}</span>
+                        <div class="radio-circle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else>
+                <div class="report-header-bg">
+                    <div class="report-header-icon">🤍</div>
+                    <div class="report-header-title">内在安全感 深度解析报告</div>
+                    <div class="report-header-time">测评完成时间: {{ finishTime }}</div>
+                </div>
+
+                <div class="report-card" style="margin-top: -30px;">
+                    <div class="card-title">隐性防御机制评估</div>
+                    
+                    <div class="total-score-box">
+                        <div class="total-label">你的安全感指数得分</div>
+                        <div class="total-num" :class="overallStatus.colorClass">{{ totalScore }}</div>
+                        <div class="total-max">满分 80 分（分数越低越缺乏安全感）</div>
+                    </div>
+
+                    <div class="level-box">
+                        <div class="level-label">你的内在特质倾向于</div>
+                        <div class="level-tag" :class="overallStatus.bgClass" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            【 {{ overallStatus.levelText }} 】
+                        </div>
+                        <div class="advice-subtitle" :class="overallStatus.colorClass">{{ overallStatus.actionText }}</div>
+                    </div>
+
+                    <div class="advice-box" :class="overallStatus.boxClass">
+                        {{ overallStatus.adviceDesc }}
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">🌱 写在最后</div>
+                        <div class="info-text">
+                            缺乏安全感并不是一种病，而是一种自我保护的本能。它可能是因为你过去受过委屈，所以现在变得特别小心翼翼。这篇报告只是为了帮你更好地抱抱自己，看见自己内在那个需要被确认的小孩。你本身就值得被爱。
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 0 15px;">
+                    <van-button type="primary" block round plain style="height: 48px; font-size: 16px; border-color: #ff9a44; color: #ff9a44;" @click="refresh">重新测试</van-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.staticfile.net/vue/3.3.4/vue.global.min.js"></script>
+    <script src="https://cdn.staticfile.net/vant/4.8.0/vant.min.js"></script>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const isValidLink = ref(false); 
+                // 新的专属防伪暗号
+                const SECRET_SALT = "security_pro"; 
+                const finishTime = ref("");
+
+                onMounted(() => {
+                    const params = new URLSearchParams(window.location.search);
+                    const key = params.get('key');
+                    if (key) {
+                        try {
+                            const decoded = atob(key); 
+                            const parts = decoded.split('||');
+                            if (parts.length === 2 && parts[1] === SECRET_SALT) {
+                                const expireTime = parseInt(parts[0]);
+                                if (Date.now() < expireTime) {
+                                    isValidLink.value = true; 
+                                }
+                            }
+                        } catch (e) {
+                            console.log("密钥解析失败");
+                        }
+                    }
+                });
+
+                const currentIndex = ref(0);
+                const userAnswers = ref([]);
+                const isFinished = ref(false);
+                const currentAnswer = ref(null);
+
+                const questions = [
+                    { id: 1, text: "从来不敢主动说出自己的看法" },
+                    { id: 2, text: "感到生活总是充满不确定性和不可预测" },
+                    { id: 3, text: "习惯于放弃自己的愿望和要求" },
+                    { id: 4, text: "总是担心会发生什么不测" },
+                    { id: 5, text: "从不拒绝朋友的要求" },
+                    { id: 6, text: "遇到不开心的事，总是独自生闷气或者痛哭" },
+                    { id: 7, text: "一直觉得自己挺倒霉的" },
+                    { id: 8, text: "别人说你是一个害羞、退缩的人" },
+                    { id: 9, text: "总是担心太好的朋友关系以后会变坏" },
+                    { id: 10, text: "对领导一直敬而远之" },
+                    { id: 11, text: "常常担心自己的思维或情感失去控制" },
+                    { id: 12, text: "总是——万事不求人" },
+                    { id: 13, text: "担心自己的生活变得一团糟" },
+                    { id: 14, text: "感到无力应对和处理突如其来的危险" },
+                    { id: 15, text: "害怕于他人建立并保持亲近关系" },
+                    { id: 16, text: "无论别人怎么说，都觉得自己很没用" }
+                ];
+                
+                // 注意分值逻辑：非常符合=1分，非常不符合=5分
+                const options = [
+                    { label: "非常符合", value: 1 }, 
+                    { label: "基本符合", value: 2 }, 
+                    { label: "中性或不确定", value: 3 },
+                    { label: "基本不符合", value: 4 }, 
+                    { label: "非常不符合", value: 5 }
+                ];
+
+                const progress = computed(() => Math.floor((currentIndex.value / questions.length) * 100));
+                const currentQuestion = computed(() => questions[currentIndex.value]);
+
+                const selectOption = (val) => {
+                    if (currentAnswer.value !== null) return;
+                    currentAnswer.value = val;
+                    userAnswers.value.push(val);
+                    setTimeout(() => {
+                        if (currentIndex.value < questions.length - 1) {
+                            currentIndex.value++;
+                            currentAnswer.value = null;
+                        } else {
+                            const now = new Date();
+                            finishTime.value = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                            isFinished.value = true;
+                        }
+                    }, 250); 
+                };
+
+                const totalScore = computed(() => userAnswers.value.reduce((sum, score) => sum + score, 0));
+
+                const overallStatus = computed(() => {
+                    const score = totalScore.value;
+                    if (score <= 32) {
+                        return { 
+                            levelText: '极度缺爱与高度防备', 
+                            actionText: '你的内心住着一个受惊的小孩', 
+                            colorClass: 'color-severe', 
+                            bgClass: 'bg-severe', 
+                            boxClass: 'box-severe', 
+                            // 在保留原意的基础上，让话术更具备情感共鸣与治愈感
+                            adviceDesc: '你的内心充满危机感，甚至严重缺乏自信。在人群中，你往往过于谦虚和压抑自我，总觉得自己不如别人，因此习惯性地妥协或顺从。你对自己的“缺点”极其敏感，总是带着厚厚的防备壳来面对世界，很难真正地放松和接纳别人。试着停止苛责自己吧，你值得被坚定地选择。' 
+                        };
+                    } else if (score <= 64) {
+                        return { 
+                            levelText: '偶尔患得患失的内耗者', 
+                            actionText: '对不确定的事物容易感到焦虑', 
+                            colorClass: 'color-moderate', 
+                            bgClass: 'bg-moderate', 
+                            boxClass: 'box-moderate', 
+                            adviceDesc: '你对自己有一定的信心，但内心深处仍或多或少隐藏着不安全感。夜深人静时，你会经常自我怀疑，容易对未来的不确定性和自身的不足感到焦虑。不过好在你对待别人很友善，大家也喜欢与你交往。建议你学着把讨好别人的精力收回来，多给自己一些肯定和安全感。' 
+                        };
+                    } else {
+                        return { 
+                            levelText: '内核稳定的自我充盈者', 
+                            actionText: '内心充满安全感与力量', 
+                            colorClass: 'color-mild', 
+                            bgClass: 'bg-mild', 
+                            boxClass: 'box-mild', 
+                            adviceDesc: '你对自己非常自信，情绪内核极其稳定。你信任他人，也相信自己值得被信任，不会把过多的精力浪费在没有必要的顾虑和内耗上。你的心态很开放，能处理好各种人际关系，并且坚信自己能掌控生活中的大部分事件。继续保持这种发光的自我吧！' 
+                        };
+                    }
+                });
+
+                const refresh = () => {
+                    currentIndex.value = 0;
+                    userAnswers.value = [];
+                    currentAnswer.value = null;
+                    isFinished.value = false;
+                };
+
+                return { 
+                    isValidLink, currentIndex, questions, options, progress, currentQuestion, currentAnswer, selectOption, 
+                    isFinished, finishTime, totalScore, overallStatus, refresh 
+                };
+            }
+        }).use(vant).mount('#app');
+    </script>
+</body>
+</html>
